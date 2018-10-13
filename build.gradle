@@ -32,8 +32,8 @@ group 'se.fnord'
 version '0.2-SNAPSHOT'
 
 ext {
-    log4j = '2.11.0'
     jackson = '2.9.7'
+    log4j = '2.11.1'
 
     junit5 = '5.3.1'
     isTravis = System.getenv('TRAVIS') ? true : false
