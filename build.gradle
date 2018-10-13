@@ -3,10 +3,6 @@ buildscript {
         mavenLocal()
         mavenCentral()
     }
-    dependencies {
-        classpath 'org.junit.platform:junit-platform-gradle-plugin:1.2.0'
-    }
-
 }
 
 plugins {
@@ -32,8 +28,6 @@ artifacts {
     archives javadocJar, sourcesJar
 }
 
-apply plugin: 'org.junit.platform.gradle.plugin'
-
 group 'se.fnord'
 version '0.2-SNAPSHOT'
 
@@ -41,7 +35,7 @@ ext {
     jackson = '2.9.5'
     log4j = '2.11.0'
 
-    junit5 = '5.2.0'
+    junit5 = '5.3.1'
     isTravis = System.getenv('TRAVIS') ? true : false
     isRelease = !isTravis && !version.endsWith("SNAPSHOT")
 
@@ -81,22 +75,15 @@ spotbugs {
     toolVersion = '3.1.3'
 }
 
-junitPlatform {
-    reportsDir file('build/reports/junit')
-}
-
 dependencies {
     api "org.apache.logging.log4j:log4j-api:${log4j}"
 
-    testCompileOnly "org.apiguardian:apiguardian-api:1.0.0"
-
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junit5}"
     testImplementation "org.junit.jupiter:junit-jupiter-params:${junit5}"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junit5}"
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.7'
+wrapper {
+    gradleVersion = '4.10.2'
 }
 
 
