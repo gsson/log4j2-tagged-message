@@ -1,41 +1,61 @@
 package se.fnord.taggedmessage;
 
-import org.apache.logging.log4j.util.TriConsumer;
-
 import java.io.Serializable;
 import java.util.function.Consumer;
 
 @SuppressWarnings("serial")
 public interface Tags extends Serializable {
-    default <T> void forEach(T state, TriConsumer<String, String, T> tagConsumer) {
+    default <T> void forEach(T state, TagConsumer<T> tagConsumer) {
         forEachGroup(g -> g.forEachTagInGroup(state, tagConsumer));
     }
 
     void forEachGroup(Consumer<Tags> collectTo);
-    <T> void forEachTagInGroup(T state, TriConsumer<String, String, T> tagConsumer);
+    <T> void forEachTagInGroup(T state, TagConsumer<T> tagConsumer);
 
-    default Tags add(String key, String value) {
+    default Tags add(String key, Object value) {
         return new Tags1(key, value, this);
     }
 
-    default Tags add(String key1, String value1, String key2, String value2) {
-        return new TagsN(new String[] { key1, key2 }, new String[] { value1, value2 }, this);
+    default Tags add(String key, long value) {
+        return new LongTags1(key, value, this);
+    }
+    default Tags add(String key, double value) {
+        return new DoubleTags1(key, value, this);
+    }
+    default Tags add(String key, boolean value) {
+        return new BooleanTags1(key, value, this);
     }
 
-    default Tags add(String key1, String value1, String key2, String value2, String key3, String value3) {
-        return new TagsN(new String[] { key1, key2, key3 }, new String[] { value1, value2, value3 }, this);
+    default Tags add(String key1, Object value1, String key2, Object value2) {
+        return new TagsN(new String[] { key1, key2 }, new Object[] { value1, value2 }, this);
     }
 
-    static Tags of(String key, String value) {
+    default Tags add(String key1, Object value1, String key2, Object value2, String key3, Object value3) {
+        return new TagsN(new String[] { key1, key2, key3 }, new Object[] { value1, value2, value3 }, this);
+    }
+
+    static Tags of(String key, Object value) {
         return new Tags1(key, value, empty());
     }
 
-    static Tags of(String key1, String value1, String key2, String value2) {
-        return new TagsN(new String[] { key1, key2 }, new String[] { value1, value2 }, empty());
+    static Tags of(String key, long value) {
+        return new LongTags1(key, value, empty());
     }
 
-    static Tags of(String key1, String value1, String key2, String value2, String key3, String value3) {
-        return new TagsN(new String[] { key1, key2, key3 }, new String[] { value1, value2, value3 }, empty());
+    static Tags of(String key, double value) {
+        return new DoubleTags1(key, value, empty());
+    }
+
+    static Tags of(String key, boolean value) {
+        return new BooleanTags1(key, value, empty());
+    }
+
+    static Tags of(String key1, Object value1, String key2, Object value2) {
+        return new TagsN(new String[] { key1, key2 }, new Object[] { value1, value2 }, empty());
+    }
+
+    static Tags of(String key1, Object value1, String key2, Object value2, String key3, Object value3) {
+        return new TagsN(new String[] { key1, key2, key3 }, new Object[] { value1, value2, value3 }, empty());
     }
 
     static Tags empty() {
@@ -53,18 +73,18 @@ class Tags0 implements Tags {
     }
 
     @Override
-    public <T> void forEachTagInGroup(T state, TriConsumer<String, String, T> tagConsumer) {
+    public <T> void forEachTagInGroup(T state, TagConsumer<T> tagConsumer) {
     }
 }
 
 class Tags1 implements Tags {
     private static final long serialVersionUID = 1L;
     private final String key;
-    private final String value;
+    private final Object value;
 
     private final Tags next;
 
-    Tags1(String key, String value, Tags next) {
+    Tags1(String key, Object value, Tags next) {
         this.key = key;
         this.value = value;
         this.next = next;
@@ -77,19 +97,94 @@ class Tags1 implements Tags {
     }
 
     @Override
-    public <T> void forEachTagInGroup(T state, TriConsumer<String, String, T> tagConsumer) {
-        tagConsumer.accept(key, value, state);
+    public <T> void forEachTagInGroup(T state, TagConsumer<T> tagConsumer) {
+        tagConsumer.objectTag(key, value, state);
+    }
+}
+
+class LongTags1 implements Tags {
+    private static final long serialVersionUID = 1L;
+    private final String key;
+    private final long value;
+
+    private final Tags next;
+
+    LongTags1(String key, long value, Tags next) {
+        this.key = key;
+        this.value = value;
+        this.next = next;
+    }
+
+    @Override
+    public void forEachGroup(Consumer<Tags> collectTo) {
+        next.forEachGroup(collectTo);
+        collectTo.accept(this);
+    }
+
+    @Override
+    public <T> void forEachTagInGroup(T state, TagConsumer<T> tagConsumer) {
+        tagConsumer.longTag(key, value, state);
+    }
+}
+
+class DoubleTags1 implements Tags {
+    private static final long serialVersionUID = 1L;
+    private final String key;
+    private final double value;
+
+    private final Tags next;
+
+    DoubleTags1(String key, double value, Tags next) {
+        this.key = key;
+        this.value = value;
+        this.next = next;
+    }
+
+    @Override
+    public void forEachGroup(Consumer<Tags> collectTo) {
+        next.forEachGroup(collectTo);
+        collectTo.accept(this);
+    }
+
+    @Override
+    public <T> void forEachTagInGroup(T state, TagConsumer<T> tagConsumer) {
+        tagConsumer.doubleTag(key, value, state);
+    }
+}
+
+class BooleanTags1 implements Tags {
+    private static final long serialVersionUID = 1L;
+    private final String key;
+    private final boolean value;
+
+    private final Tags next;
+
+    BooleanTags1(String key, boolean value, Tags next) {
+        this.key = key;
+        this.value = value;
+        this.next = next;
+    }
+
+    @Override
+    public void forEachGroup(Consumer<Tags> collectTo) {
+        next.forEachGroup(collectTo);
+        collectTo.accept(this);
+    }
+
+    @Override
+    public <T> void forEachTagInGroup(T state, TagConsumer<T> tagConsumer) {
+        tagConsumer.booleanTag(key, value, state);
     }
 }
 
 class TagsN implements Tags {
     private static final long serialVersionUID = 1L;
     private final String[] keys;
-    private final String[] values;
+    private final Object[] values;
 
     private final Tags next;
 
-    TagsN(String[] keys, String[] values, Tags next) {
+    TagsN(String[] keys, Object[] values, Tags next) {
         this.keys = keys;
         this.values = values;
         this.next = next;
@@ -102,9 +197,9 @@ class TagsN implements Tags {
     }
 
     @Override
-    public <T> void forEachTagInGroup(T state, TriConsumer<String, String, T> tagConsumer) {
+    public <T> void forEachTagInGroup(T state, TagConsumer<T> tagConsumer) {
         for (int i = 0; i < keys.length; i++) {
-            tagConsumer.accept(keys[i], values[i], state);
+            tagConsumer.objectTag(keys[i], values[i], state);
         }
     }
 }
