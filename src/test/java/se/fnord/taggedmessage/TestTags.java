@@ -4,6 +4,7 @@ import org.apache.logging.log4j.util.TriConsumer;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -103,7 +104,23 @@ public class TestTags {
         assertForEach(Tags.of("a", "b"), tag("a", "b"));
         assertForEach(Tags.of("a", "b", "c", "d"), tag("a", "b"), tag("c", "d"));
         assertForEach(Tags.of("a", "b", "c", "d", "e", "f"), tag("a", "b"), tag("c", "d"), tag("e", "f"));
+    }
 
+    @Test
+    public void testFromMap() {
+        LinkedHashMap<String, String> map = new LinkedHashMap<>();
+        map.put("a", "1");
+        assertForEach(Tags.fromMap(map),
+                tag("a", "1"));
+        map.put("b", "2");
+        assertForEach(Tags.fromMap(map),
+                tag("a", "1"),
+                tag("b", "2"));
+        map.put("c", "3");
+        assertForEach(Tags.fromMap(map),
+                tag("a", "1"),
+                tag("b", "2"),
+                tag("c", "3"));
     }
 
     @Test

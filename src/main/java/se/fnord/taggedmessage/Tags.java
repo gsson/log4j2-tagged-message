@@ -1,10 +1,15 @@
 package se.fnord.taggedmessage;
 
 import java.io.Serializable;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 @SuppressWarnings("serial")
 public interface Tags extends Serializable {
+
+
     default <T> void forEach(T state, TagConsumer<T> tagConsumer) {
         forEachGroup(g -> g.forEachTagInGroup(state, tagConsumer));
     }
@@ -13,7 +18,7 @@ public interface Tags extends Serializable {
     <T> void forEachTagInGroup(T state, TagConsumer<T> tagConsumer);
 
     default Tags add(String key, Object value) {
-        return new Tags1(key, value, this);
+        return TagsFactory.create(key, value, this);
     }
 
     default Tags add(String key, long value) {
@@ -27,15 +32,21 @@ public interface Tags extends Serializable {
     }
 
     default Tags add(String key1, Object value1, String key2, Object value2) {
-        return new TagsN(new String[] { key1, key2 }, new Object[] { value1, value2 }, this);
+        return TagsFactory.create(new CharSequence[] { key1, key2 }, new Object[] { value1, value2 }, this);
     }
 
     default Tags add(String key1, Object value1, String key2, Object value2, String key3, Object value3) {
-        return new TagsN(new String[] { key1, key2, key3 }, new Object[] { value1, value2, value3 }, this);
+        return TagsFactory.create(new CharSequence[] { key1, key2, key3 }, new Object[] { value1, value2, value3 }, this);
+    }
+
+    default Tags addFromMap(Map<String, ? extends Object> map) {
+        return TagsBuilder.get()
+                .addFromMap(map)
+                .build();
     }
 
     static Tags of(String key, Object value) {
-        return new Tags1(key, value, empty());
+        return TagsFactory.create(key, value, empty());
     }
 
     static Tags of(String key, long value) {
@@ -51,18 +62,23 @@ public interface Tags extends Serializable {
     }
 
     static Tags of(String key1, Object value1, String key2, Object value2) {
-        return new TagsN(new String[] { key1, key2 }, new Object[] { value1, value2 }, empty());
+        return TagsFactory.create(new CharSequence[] { key1, key2 }, new Object[] { value1, value2 }, empty());
     }
 
     static Tags of(String key1, Object value1, String key2, Object value2, String key3, Object value3) {
-        return new TagsN(new String[] { key1, key2, key3 }, new Object[] { value1, value2, value3 }, empty());
+        return TagsFactory.create(new CharSequence[] { key1, key2, key3 }, new Object[] { value1, value2, value3 }, empty());
+    }
+
+    static Tags fromMap(Map<String, ? extends Object> map) {
+        return TagsBuilder.get()
+                .addFromMap(map)
+                .build();
     }
 
     static Tags empty() {
         return Tags0.EMPTY;
     }
 }
-
 
 class Tags0 implements Tags {
     private static final long serialVersionUID = 1L;
@@ -79,12 +95,12 @@ class Tags0 implements Tags {
 
 class Tags1 implements Tags {
     private static final long serialVersionUID = 1L;
-    private final String key;
+    private final CharSequence key;
     private final Object value;
 
     private final Tags next;
 
-    Tags1(String key, Object value, Tags next) {
+    Tags1(CharSequence key, Object value, Tags next) {
         this.key = key;
         this.value = value;
         this.next = next;
@@ -104,12 +120,12 @@ class Tags1 implements Tags {
 
 class LongTags1 implements Tags {
     private static final long serialVersionUID = 1L;
-    private final String key;
+    private final CharSequence key;
     private final long value;
 
     private final Tags next;
 
-    LongTags1(String key, long value, Tags next) {
+    LongTags1(CharSequence key, long value, Tags next) {
         this.key = key;
         this.value = value;
         this.next = next;
@@ -129,12 +145,12 @@ class LongTags1 implements Tags {
 
 class DoubleTags1 implements Tags {
     private static final long serialVersionUID = 1L;
-    private final String key;
+    private final CharSequence key;
     private final double value;
 
     private final Tags next;
 
-    DoubleTags1(String key, double value, Tags next) {
+    DoubleTags1(CharSequence key, double value, Tags next) {
         this.key = key;
         this.value = value;
         this.next = next;
@@ -154,12 +170,12 @@ class DoubleTags1 implements Tags {
 
 class BooleanTags1 implements Tags {
     private static final long serialVersionUID = 1L;
-    private final String key;
+    private final CharSequence key;
     private final boolean value;
 
     private final Tags next;
 
-    BooleanTags1(String key, boolean value, Tags next) {
+    BooleanTags1(CharSequence key, boolean value, Tags next) {
         this.key = key;
         this.value = value;
         this.next = next;
@@ -177,14 +193,37 @@ class BooleanTags1 implements Tags {
     }
 }
 
+class NullTags1 implements Tags {
+    private static final long serialVersionUID = 1L;
+    private final CharSequence key;
+
+    private final Tags next;
+
+    NullTags1(CharSequence key, Tags next) {
+        this.key = key;
+        this.next = next;
+    }
+
+    @Override
+    public void forEachGroup(Consumer<Tags> collectTo) {
+        next.forEachGroup(collectTo);
+        collectTo.accept(this);
+    }
+
+    @Override
+    public <T> void forEachTagInGroup(T state, TagConsumer<T> tagConsumer) {
+        tagConsumer.nullTag(key, state);
+    }
+}
+
 class TagsN implements Tags {
     private static final long serialVersionUID = 1L;
-    private final String[] keys;
+    private final CharSequence[] keys;
     private final Object[] values;
 
     private final Tags next;
 
-    TagsN(String[] keys, Object[] values, Tags next) {
+    TagsN(CharSequence[] keys, Object[] values, Tags next) {
         this.keys = keys;
         this.values = values;
         this.next = next;
