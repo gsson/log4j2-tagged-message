@@ -88,12 +88,12 @@ class Tags0 implements Tags {
 
 class Tags1 implements Tags {
     private static final long serialVersionUID = 1L;
-    private final String key;
+    private final CharSequence key;
     private final Object value;
 
     private final Tags next;
 
-    Tags1(String key, Object value, Tags next) {
+    Tags1(CharSequence key, Object value, Tags next) {
         this.key = key;
         this.value = value;
         this.next = next;
@@ -113,12 +113,12 @@ class Tags1 implements Tags {
 
 class LongTags1 implements Tags {
     private static final long serialVersionUID = 1L;
-    private final String key;
+    private final CharSequence key;
     private final long value;
 
     private final Tags next;
 
-    LongTags1(String key, long value, Tags next) {
+    LongTags1(CharSequence key, long value, Tags next) {
         this.key = key;
         this.value = value;
         this.next = next;
@@ -138,12 +138,12 @@ class LongTags1 implements Tags {
 
 class DoubleTags1 implements Tags {
     private static final long serialVersionUID = 1L;
-    private final String key;
+    private final CharSequence key;
     private final double value;
 
     private final Tags next;
 
-    DoubleTags1(String key, double value, Tags next) {
+    DoubleTags1(CharSequence key, double value, Tags next) {
         this.key = key;
         this.value = value;
         this.next = next;
@@ -163,12 +163,12 @@ class DoubleTags1 implements Tags {
 
 class BooleanTags1 implements Tags {
     private static final long serialVersionUID = 1L;
-    private final String key;
+    private final CharSequence key;
     private final boolean value;
 
     private final Tags next;
 
-    BooleanTags1(String key, boolean value, Tags next) {
+    BooleanTags1(CharSequence key, boolean value, Tags next) {
         this.key = key;
         this.value = value;
         this.next = next;
@@ -188,28 +188,28 @@ class BooleanTags1 implements Tags {
 
 class TagsN implements Tags {
     private static final long serialVersionUID = 1L;
-    private final String[] keys;
+    private final CharSequence[] keys;
     private final Object[] values;
 
     private final Tags next;
 
-    static Tags fromMap(Map<String, ?> map, Tags next) {
+    static Tags fromMap(Map<? extends CharSequence, ?> map, Tags next) {
         if (map.isEmpty()) {
             return next;
         }
         int size = map.size();
         // TODO: size == 1 should return a Tags1
-        String[] tagNames = new String[size];
+        CharSequence[] tagNames = new CharSequence[size];
         Object[] tagValues = new Object[size];
         int i = 0;
-        for (Map.Entry<String, ?> e: map.entrySet()) {
+        for (Map.Entry<? extends CharSequence, ?> e: map.entrySet()) {
             tagNames[i] = e.getKey();
             tagValues[i++] = e.getValue();
         }
         return new TagsN(tagNames, tagValues, next);
     }
 
-    TagsN(String[] keys, Object[] values, Tags next) {
+    TagsN(CharSequence[] keys, Object[] values, Tags next) {
         this.keys = keys;
         this.values = values;
         this.next = next;
