@@ -3,9 +3,7 @@ package se.fnord.taggedmessage;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
@@ -103,7 +101,6 @@ public class TestTags {
         assertForEach(Tags.of("a", "b"), tag("a", "b"));
         assertForEach(Tags.of("a", "b", "c", "d"), tag("a", "b"), tag("c", "d"));
         assertForEach(Tags.of("a", "b", "c", "d", "e", "f"), tag("a", "b"), tag("c", "d"), tag("e", "f"));
-
     }
 
     @Test
@@ -115,5 +112,15 @@ public class TestTags {
         assertForEach(Tags.empty().add("a", "b"), tag("a", "b"));
         assertForEach(Tags.empty().add("a", "b", "c", "d"), tag("a", "b"), tag("c", "d"));
         assertForEach(Tags.empty().add("a", "b", "c", "d", "e", "f"), tag("a", "b"), tag("c", "d"), tag("e", "f"));
+    }
+
+    @Test
+    public void testTagsFromMap() {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("a", 1);
+        m.put("b", "c");
+
+        assertForEach(Tags.empty().add(m), tag("a", 1L), tag("b", "c"));
+        assertForEach(Tags.of(m), tag("a", 1L), tag("b", "c"));
     }
 }

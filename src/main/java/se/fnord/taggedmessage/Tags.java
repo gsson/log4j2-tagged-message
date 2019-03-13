@@ -1,6 +1,7 @@
 package se.fnord.taggedmessage;
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.function.Consumer;
 
 @SuppressWarnings("serial")
@@ -34,6 +35,10 @@ public interface Tags extends Serializable {
         return new TagsN(new String[] { key1, key2, key3 }, new Object[] { value1, value2, value3 }, this);
     }
 
+    default Tags add(Map<String, ?> tags) {
+        return TagsN.fromMap(tags, this);
+    }
+
     static Tags of(String key, Object value) {
         return new Tags1(key, value, empty());
     }
@@ -56,6 +61,10 @@ public interface Tags extends Serializable {
 
     static Tags of(String key1, Object value1, String key2, Object value2, String key3, Object value3) {
         return new TagsN(new String[] { key1, key2, key3 }, new Object[] { value1, value2, value3 }, empty());
+    }
+
+    static Tags of(Map<String, ?> tags) {
+        return TagsN.fromMap(tags, empty());
     }
 
     static Tags empty() {
@@ -183,6 +192,22 @@ class TagsN implements Tags {
     private final Object[] values;
 
     private final Tags next;
+
+    static Tags fromMap(Map<String, ?> map, Tags next) {
+        if (map.isEmpty()) {
+            return next;
+        }
+        int size = map.size();
+        // TODO: size == 1 should return a Tags1
+        String[] tagNames = new String[size];
+        Object[] tagValues = new Object[size];
+        int i = 0;
+        for (Map.Entry<String, ?> e: map.entrySet()) {
+            tagNames[i] = e.getKey();
+            tagValues[i++] = e.getValue();
+        }
+        return new TagsN(tagNames, tagValues, next);
+    }
 
     TagsN(String[] keys, Object[] values, Tags next) {
         this.keys = keys;
