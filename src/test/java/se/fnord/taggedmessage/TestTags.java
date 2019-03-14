@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -112,6 +113,17 @@ public class TestTags {
         assertForEach(Tags.empty().add("a", "b"), tag("a", "b"));
         assertForEach(Tags.empty().add("a", "b", "c", "d"), tag("a", "b"), tag("c", "d"));
         assertForEach(Tags.empty().add("a", "b", "c", "d", "e", "f"), tag("a", "b"), tag("c", "d"), tag("e", "f"));
+    }
+
+    @Test
+    public void testNormalisation() {
+        assertForEach(Tags.empty().add("a", singletonList(32)), tag("a", "[32]"));
+        assertForEach(Tags.of("a", singletonList(32)), tag("a", "[32]"));
+
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("a", singletonList(32));
+
+        assertForEach(Tags.of(m), tag("a", "[32]"));
     }
 
     @Test

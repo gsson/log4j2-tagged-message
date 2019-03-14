@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import static se.fnord.taggedmessage.TagsFactory.normaliseObjectValue;
+
 @SuppressWarnings("serial")
 public interface Tags extends Serializable {
     default <T> void forEach(T state, TagConsumer<T> tagConsumer) {
@@ -14,7 +16,7 @@ public interface Tags extends Serializable {
     <T> void forEachTagInGroup(T state, TagConsumer<T> tagConsumer);
 
     default Tags add(String key, Object value) {
-        return new Tags1(key, value, this);
+        return new Tags1(key, normaliseObjectValue(value), this);
     }
 
     default Tags add(String key, long value) {
@@ -28,11 +30,11 @@ public interface Tags extends Serializable {
     }
 
     default Tags add(String key1, Object value1, String key2, Object value2) {
-        return new TagsN(new String[] { key1, key2 }, new Object[] { value1, value2 }, this);
+        return new TagsN(new String[] { key1, key2 }, new Object[] { normaliseObjectValue(value1), normaliseObjectValue(value2) }, this);
     }
 
     default Tags add(String key1, Object value1, String key2, Object value2, String key3, Object value3) {
-        return new TagsN(new String[] { key1, key2, key3 }, new Object[] { value1, value2, value3 }, this);
+        return new TagsN(new String[] { key1, key2, key3 }, new Object[] { normaliseObjectValue(value1), normaliseObjectValue(value2), normaliseObjectValue(value3) }, this);
     }
 
     default Tags add(Map<String, ?> tags) {
@@ -40,7 +42,7 @@ public interface Tags extends Serializable {
     }
 
     static Tags of(String key, Object value) {
-        return new Tags1(key, value, empty());
+        return new Tags1(key, normaliseObjectValue(value), empty());
     }
 
     static Tags of(String key, long value) {
@@ -56,11 +58,11 @@ public interface Tags extends Serializable {
     }
 
     static Tags of(String key1, Object value1, String key2, Object value2) {
-        return new TagsN(new String[] { key1, key2 }, new Object[] { value1, value2 }, empty());
+        return new TagsN(new String[] { key1, key2 }, new Object[] { normaliseObjectValue(value1), normaliseObjectValue(value2) }, empty());
     }
 
     static Tags of(String key1, Object value1, String key2, Object value2, String key3, Object value3) {
-        return new TagsN(new String[] { key1, key2, key3 }, new Object[] { value1, value2, value3 }, empty());
+        return new TagsN(new String[] { key1, key2, key3 }, new Object[] { normaliseObjectValue(value1), normaliseObjectValue(value2), normaliseObjectValue(value3) }, empty());
     }
 
     static Tags of(Map<String, ?> tags) {
@@ -204,7 +206,7 @@ class TagsN implements Tags {
         int i = 0;
         for (Map.Entry<? extends CharSequence, ?> e: map.entrySet()) {
             tagNames[i] = e.getKey();
-            tagValues[i++] = e.getValue();
+            tagValues[i++] = normaliseObjectValue(e.getValue());
         }
         return new TagsN(tagNames, tagValues, next);
     }
