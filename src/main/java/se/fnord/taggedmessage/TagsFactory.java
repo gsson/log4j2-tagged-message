@@ -19,6 +19,22 @@ class TagsFactory {
         SAFE_TYPES = safeTypes;
     }
 
+    static Tags fromMap(Map<? extends CharSequence, ?> map, Tags next) {
+        if (map.isEmpty()) {
+            return next;
+        }
+        int size = map.size();
+        // TODO: size == 1 should return a Tags1
+        CharSequence[] tagNames = new CharSequence[size];
+        Object[] tagValues = new Object[size];
+        int i = 0;
+        for (Map.Entry<? extends CharSequence, ?> e : map.entrySet()) {
+            tagNames[i] = e.getKey();
+            tagValues[i++] = normaliseObjectValue(e.getValue());
+        }
+        return new TagsN(tagNames, tagValues, next);
+    }
+
     static Object normaliseObjectValue(Object value) {
         if (value == null) {
             return null;

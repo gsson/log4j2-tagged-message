@@ -38,7 +38,7 @@ public interface Tags extends Serializable {
     }
 
     default Tags add(Map<String, ?> tags) {
-        return TagsN.fromMap(tags, this);
+        return TagsFactory.fromMap(tags, this);
     }
 
     static Tags of(String key, Object value) {
@@ -66,7 +66,7 @@ public interface Tags extends Serializable {
     }
 
     static Tags of(Map<String, ?> tags) {
-        return TagsN.fromMap(tags, empty());
+        return TagsFactory.fromMap(tags, empty());
     }
 
     static Tags empty() {
@@ -194,22 +194,6 @@ class TagsN implements Tags {
     private final Object[] values;
 
     private final Tags next;
-
-    static Tags fromMap(Map<? extends CharSequence, ?> map, Tags next) {
-        if (map.isEmpty()) {
-            return next;
-        }
-        int size = map.size();
-        // TODO: size == 1 should return a Tags1
-        CharSequence[] tagNames = new CharSequence[size];
-        Object[] tagValues = new Object[size];
-        int i = 0;
-        for (Map.Entry<? extends CharSequence, ?> e: map.entrySet()) {
-            tagNames[i] = e.getKey();
-            tagValues[i++] = normaliseObjectValue(e.getValue());
-        }
-        return new TagsN(tagNames, tagValues, next);
-    }
 
     TagsN(CharSequence[] keys, Object[] values, Tags next) {
         this.keys = keys;
