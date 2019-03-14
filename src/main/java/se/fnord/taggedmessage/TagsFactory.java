@@ -23,8 +23,13 @@ class TagsFactory {
         if (map.isEmpty()) {
             return next;
         }
+
         int size = map.size();
-        // TODO: size == 1 should return a Tags1
+        if (size == 1) {
+            Map.Entry<? extends CharSequence, ?> e = map.entrySet().iterator().next();
+            return new Tags1(e.getKey(), normaliseObjectValue(e.getValue()), next);
+        }
+
         CharSequence[] tagNames = new CharSequence[size];
         Object[] tagValues = new Object[size];
         int i = 0;
